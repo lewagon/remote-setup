@@ -74,6 +74,18 @@ jobs:
             -f issue_number="${{ github.event.issue.number }}" \
             -f source_repo="${{ github.repository }}"
 
+      - name: Notify pending
+        if: success() && steps.dispatch.outcome == 'success'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: '✅ Your SSH key has been submitted. Key registration typically takes a few minutes — you will be notified once it is done.'
+            });
+
       - name: Register error
         if: failure() && steps.dispatch.outcome == 'failure'
         uses: actions/github-script@v7
