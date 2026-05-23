@@ -1,0 +1,22 @@
+name: New SSH Key
+description: Add new SSH Key
+title: New SSH Key
+body:
+  - type: input
+    id: alias
+    attributes:
+      label: Your alias
+      description: The alias you received from Le Wagon (e.g. brave-lion)
+      placeholder: brave-lion-3f9a
+    validations:
+      required: true
+  - type: textarea
+    id: ssh_key
+    attributes:
+      label: Your SSH public key
+      description: |
+        Paste the full content of your public key file.
+        Run this command and paste the output:  cat ~/.ssh/id_ed25519.pub
+      placeholder: ssh-ed25519 AAAA...
+    validations:
+      required: true
