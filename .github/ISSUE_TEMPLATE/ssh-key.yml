@@ -1,6 +1,7 @@
 name: New SSH Key
 description: Add new SSH Key
 title: New SSH Key
+labels: ["ssh-key"]
 body:
   - type: input
     id: alias
