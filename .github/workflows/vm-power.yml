@@ -2,7 +2,7 @@ name: VM power
 
 on:
   issues:
-    types: [opened, edited]
+    types: [edited, labeled]
 
 jobs:
   forward:
