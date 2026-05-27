@@ -1,0 +1,13 @@
+name: Start my VM
+description: Request to start your VM
+title: Start VM
+labels: ["vm-start"]
+body:
+  - type: input
+    id: alias
+    attributes:
+      label: Your alias
+      description: The alias you received from Le Wagon (e.g. brave-lion-3f9a2b4c)
+      placeholder: brave-lion-3f9a2b4c
+    validations:
+      required: true

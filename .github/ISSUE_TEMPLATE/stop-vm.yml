@@ -1,0 +1,13 @@
+name: Stop my VM
+description: Request to stop your VM
+title: Stop VM
+labels: ["vm-stop"]
+body:
+  - type: input
+    id: alias
+    attributes:
+      label: Your alias
+      description: The alias you received from Le Wagon (e.g. brave-lion-3f9a2b4c)
+      placeholder: brave-lion-3f9a2b4c
+    validations:
+      required: true

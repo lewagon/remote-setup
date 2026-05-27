@@ -1,0 +1,92 @@
+name: VM power
+
+on:
+  issues:
+    types: [opened, edited]
+
+jobs:
+  forward:
+    runs-on: ubuntu-latest
+    if: |
+      github.event.issue.state == 'open' &&
+      (contains(github.event.issue.labels.*.name, 'vm-start') ||
+       contains(github.event.issue.labels.*.name, 'vm-stop'))
+    permissions:
+      issues: write
+
+    steps:
+      - name: Parse issue body
+        id: parse
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: |
+          python3 - <<'EOF'
+          import os, re, sys
+
+          body = os.environ["ISSUE_BODY"]
+
+          alias_m = re.search(r'### Your alias\s*\n+([^\n#]+)', body)
+
+          if not alias_m:
+              print("::error::Could not find alias in issue body."); sys.exit(1)
+
+          alias = alias_m.group(1).strip()
+
+          if not re.fullmatch(r'[a-z]+-[a-z]+-[0-9a-f]+', alias):
+              print(f"::error::Alias '{alias}' has an unexpected format (expected: word-word-hex).")
+              sys.exit(1)
+
+          with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+              print(f"alias={alias}", file=f)
+          EOF
+
+      - name: Parse error
+        if: failure() && steps.parse.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: '❌ Could not read your alias. Please make sure you used the issue template.'
+            });
+
+      - name: Dispatch to terraform
+        id: dispatch
+        env:
+          GH_TOKEN: ${{ secrets.INFRA_DISPATCH_TOKEN }}
+          ALIAS: ${{ steps.parse.outputs.alias }}
+        run: |
+          ACTION=${{ contains(github.event.issue.labels.*.name, 'vm-start') && 'start' || 'stop' }}
+          gh workflow run vm-power.yml \
+            --repo lewagon/terraform \
+            -f alias="$ALIAS" \
+            -f action="$ACTION" \
+            -f github_username="${{ github.event.issue.user.login }}" \
+            -f issue_number="${{ github.event.issue.number }}" \
+            -f source_repo="${{ github.repository }}"
+
+      - name: Notify pending
+        if: success() && steps.dispatch.outcome == 'success'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: '⏳ Request received. Your VM will be updated shortly.'
+            });
+
+      - name: Dispatch error
+        if: failure() && steps.dispatch.outcome == 'failure'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: '⚠️ Error submitting request. Please contact the Le Wagon team.'
+            });
