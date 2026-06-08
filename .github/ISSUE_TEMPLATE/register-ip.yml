@@ -1,0 +1,22 @@
+name: Register IP address
+description: Allow SSH access from your current network
+title: Register IP
+labels: ["vm-ip"]
+body:
+  - type: input
+    id: alias
+    attributes:
+      label: Your alias
+      description: The alias you received from Le Wagon (e.g. brave-lion-3f9a2b4c)
+      placeholder: brave-lion-3f9a2b4c
+    validations:
+      required: true
+  - type: input
+    id: ip_address
+    attributes:
+      label: Your public IP address
+      description: |
+        Run this command and paste the result:  curl -s ifconfig.me
+      placeholder: "203.0.113.42"
+    validations:
+      required: true
