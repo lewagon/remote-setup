@@ -90,7 +90,7 @@ jobs:
               body: '⏳ IP registration submitted. You will be notified once SSH access is enabled from your IP.'
             });
 
-      - name: Dispatch error
+      - name: Register error
         if: failure() && steps.dispatch.outcome == 'failure'
         uses: actions/github-script@v7
         with:
@@ -99,5 +99,5 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
-              body: '⚠️ Error submitting request. Please contact the Le Wagon team.'
+              body: '⚠️ Error submitting data. Please contact the Le Wagon team.'
             });
